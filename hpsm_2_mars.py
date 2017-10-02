@@ -22,18 +22,14 @@ wso2 = config['HIRO']['WSO2']
 hirouser = config['HIRO']['HIROUSER']
 hiropassword = config['HIRO']['HIROPASS']
 
-
 ta = (application.encode('utf-8')).split(',')
 tr = (resource.encode('utf-8')).split(",")
 ts = (software.encode('utf-8')).split(",")
 tm = (machine.encode('utf-8')).split(",")
 
 application_node = '{"ogit/Automation/marsNodeFormalRepresentation" : "<DataManagement xmlns=\\"https://graphit.co/schemas/v2/MARSSchema\\" ApplicationClass=\\"Data\\" ApplicationSubClass=\\"DataManagement\\" ID=\\"CMDBIntegration:Production:Application:ApplicationDummy\\" NodeName=\\"ApplicationDummy\\" NodeType=\\"Application\\" CustomerID=\\"cmdbintegration\\" CustomerName=\\"CMDBIntegration\\"> <SourceCiId> <Content Value=\\"id1\\"/> </SourceCiId> <Dependencies> <Node ID=\\"CMDBIntegration:Production:Resource:ResourceDummy\\"/> </Dependencies> </DataManagement>",  "ogit/_owner" : "cmdb",  "ogit/_id": "CMDBIntegration:Production:Application:ApplicationDummy",  "ogit/name": "ApplicationDummy",  "ogit/Automation/marsNodeType": "Application",  "ogit/id": ""}'
-
 resource_node = '{"ogit/Automation/marsNodeFormalRepresentation" : "<Database xmlns=\\"https://graphit.co/schemas/v2/MARSSchema\\" ResourceClass=\\"Database\\" ID=\\"CMDBIntegration:Production:Resource:ResourceDummy\\" NodeName=\\"ResourceDummy\\" NodeType=\\"Resource\\" CustomerID=\\"cmdbintegration\\" CustomerName=\\"CMDBIntegration\\"> <Dependencies> <Node ID=\\"CMDBIntegration:Production:Application:ApplicationDummy\\"/> </Dependencies></Database>",  "ogit/_owner" : "cmdbintegration",  "ogit/_id": "CMDBIntegration:Production:Resource:ResourceDummy",  "ogit/name": "ResourceDummy",  "ogit/Automation/marsNodeType": "Resource",  "ogit/id": ""}'
-
 software_node = '{"ogit/Automation/marsNodeFormalRepresentation" : "<MySQL xmlns=\\"https://graphit.co/schemas/v2/MARSSchema\\" SoftwareClass=\\"DBMS\\" SoftwareSubClass=\\"MySQL\\" ID=\\"CMDBIntegration:Production:Software:SoftwareDummy\\" NodeName=\\"SoftwareDummy\\" NodeType=\\"Software\\" CustomerID=\\"cmdbintegration\\" CustomerName=\\"CMDBIntegration\\"><Dependencies> <Node ID=\\"CMDBIntegration:Production:Resource:ResourceDummy\\"/></Dependencies></MySQL>","ogit/_owner" : "cmdbintegration","ogit/_id": "CMDBIntegration:Production:Resource:SoftwareDummy","ogit/name": "SoftwareDummy", "ogit/Automation/marsNodeType": "Software", "ogit/id": ""}'
-
 
 headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
 payload = {'grant_type': 'password', 'username': hirouser, 'password': hiropassword, 'scope': 'individual,department,company', 'client_id': cliemtkey, 'client_secret': clientsecret}
@@ -49,22 +45,14 @@ sof_payload = json.loads(json.dumps(software_node))
 headers = {'Content-Type': 'application/json', '_TOKEN': strtok}
 url = graphit + "/new/ogit%2FAutomation%2FMARSNode"
 post = requests.post(url, headers=headers, data=app_payload, verify=False)
-#print post.text
 post = requests.post(url, headers=headers, data=res_payload, verify=False)
-#print post.text
 post = requests.post(url, headers=headers, data=sof_payload, verify=False)
-#print post.text
 
 count = 1
 url = "http://" + ip + ":" + port + "/SM/9/rest/YarvisCMDB?Type=CI&count=1"
-#print(url)
 r = requests.get(url, auth=(user, password))
-#print(r.status_code)
 data = r.json()
 total_count = data['@totalcount']
-
-#print('count is: ', count)
-#print('total is: ', total_count)
 
 while count < total_count:
     curl = "http://" + ip + ":" + port + "/SM/9/rest/YarvisCMDB?Type=CI&start=" + str(count)
@@ -79,8 +67,6 @@ while count < total_count:
 	if (sci_r.status_code == 200):
 		sci_data = sci_r.json()
 		citype = sci_data['CI']['ConfigurationItemType']
-		#print sci_data
-
 		if (citype in ta):
 			pass
 		if (citype in tr):
@@ -98,11 +84,6 @@ while count < total_count:
 				subtype = "UNIX"
 			if (subtype == "Wireless" or subtype == "WirelessLANController"):
 				subtype = "WiFi"
-			#print "Building machine noode for", single_ci
-
-                        #print citype
-			#print subtype
-                        #print sci_data['CI']
 
 			outputjson = "{\"ogit/Automation/marsNodeFormalRepresentation\" : \"<"
 			outputjson += subtype
@@ -125,11 +106,9 @@ while count < total_count:
 			if (post.status_code == 200):
 				print "Sucessfully created node", sci_data['CI']['ConfigurationItem'], "of type: ", subtype
 			else:
-				#print post.text
 				ciname = sci_data['CI']['ConfigurationItem']
 				url = graphit + "/CMDBIntegration%3AProduction%3AMachine%3A" + urllib.quote_plus(ciname.encode('utf8'))
 				post = requests.post(url, headers=headers, data=data, verify=False)
-				#print post.text
 				if (post.status_code == 200):
 					print "Succesfully updated node", sci_data['CI']['ConfigurationItem']
 	else:
