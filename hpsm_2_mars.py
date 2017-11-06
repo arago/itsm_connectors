@@ -49,20 +49,20 @@ post = requests.post(url, headers=headers, data=res_payload, verify=False)
 post = requests.post(url, headers=headers, data=sof_payload, verify=False)
 
 count = 1
-url = "http://" + ip + ":" + port + "/SM/9/rest/YarvisCMDB?Type=CI&count=1"
+url = "http://" + ip + ":" + port + "/SM/9/rest/QueueCMDB?Type=CI&count=1"
 r = requests.get(url, auth=(user, password))
 data = r.json()
 total_count = data['@totalcount']
 
 while count < total_count:
-    curl = "http://" + ip + ":" + port + "/SM/9/rest/YarvisCMDB?Type=CI&start=" + str(count)
+    curl = "http://" + ip + ":" + port + "/SM/9/rest/QueueCMDB?Type=CI&start=" + str(count)
     ci = requests.get(curl, auth=(user, password))
     results_data = ci.json()
     results_num = results_data['@count']
 
     for value in results_data['content']:
 	single_ci = value['CI']['ConfigurationItem']
-	surl = "http://" + ip + ":" + port + "/SM/9/rest/YarvisCMDB/" + urllib.quote_plus(single_ci.encode('utf8'))
+	surl = "http://" + ip + ":" + port + "/SM/9/rest/QueueCMDB/" + urllib.quote_plus(single_ci.encode('utf8'))
 	sci_r = requests.get(surl, auth=(user, password))
 	if (sci_r.status_code == 200):
 		sci_data = sci_r.json()
